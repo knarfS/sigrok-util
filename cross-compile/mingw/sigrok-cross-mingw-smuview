@@ -1,0 +1,262 @@
+#!/bin/sh
+##
+## This file is part of the sigrok-util project.
+##
+## Copyright (C) 2013-2018 Uwe Hermann <uwe@hermann-uwe.de>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <http://www.gnu.org/licenses/>.
+##
+
+set -e
+
+# Build target: "i686" (32bit) or "x86_64" (64bit).
+TARGET="i686"
+
+# The path where your MXE directory is located.
+MXE=$HOME/mxe-git-smuview
+
+# The base path prefix where the cross-compiled packages will be installed.
+PREFIXBASE=$HOME/sr_mingw_smuview
+
+# The base path prefix where to download files to and where to build packages.
+BUILDBASE=./build
+
+# Edit this to control verbose build output.
+V="V=1 VERBOSE=1"
+
+# Edit this to enable/disable/modify parallel compiles.
+PARALLEL="-j 4"
+
+# Edit this to enable/disable debug builds.
+DEBUG=1
+
+# You usually don't need to change anything below this line.
+
+# -----------------------------------------------------------------------------
+
+WGET="wget -c --quiet"
+GIT_CLONE="git clone --depth=1"
+
+REPO_BASE="git://sigrok.org"
+
+# Construct the build and install directory pathnames.
+if [ $TARGET = "i686" ]; then
+	SUFFIX="32"
+else
+	SUFFIX="64"
+fi
+if [ $DEBUG = 1 ]; then
+	# CFLAGS/CXXFLAGS contains "-g" per default for autotools projects.
+	BUILD_TYPE="Debug"
+	PREFIX=$PREFIXBASE"_debug_"$SUFFIX
+	BUILDDIR=$BUILDBASE"_debug_"$SUFFIX
+else
+	BUILD_TYPE="Release"
+	PREFIX=$PREFIXBASE"_release_"$SUFFIX
+	BUILDDIR=$BUILDBASE"_release_"$SUFFIX
+fi
+
+# -----------------------------------------------------------------------------
+
+# We need to find tools in the toolchain.
+export PATH=$MXE/usr/bin:$PATH
+
+TOOLCHAIN_TRIPLET="$TARGET-w64-mingw32.static.posix"
+
+CMAKE="$TOOLCHAIN_TRIPLET-cmake"
+
+P="$PREFIX/lib/pkgconfig"
+P2="$MXE/usr/$TOOLCHAIN_TRIPLET/lib/pkgconfig"
+C="--host=$TOOLCHAIN_TRIPLET --prefix=$PREFIX CPPFLAGS=-D__printf__=__gnu_printf__"
+L="--disable-shared --enable-static"
+
+if [ $TARGET = "i686" ]; then
+	export PKG_CONFIG_PATH_i686_w64_mingw32_static_posix="$P:$P2"
+else
+	export PKG_CONFIG_PATH_x86_64_w64_mingw32_static_posix="$P:$P2"
+fi
+
+# Remove build directory contents (if any) and create a new build dir.
+rm -rf $BUILDDIR
+mkdir $BUILDDIR
+cd $BUILDDIR
+
+# -----------------------------------------------------------------------------
+
+mkdir -p $PREFIX
+
+# Cross-compiling Python is highly non-trivial, so we avoid it for now.
+# The download below is a repackaged tarball of the official Python 3.4.4 MSI
+# installer for Windows:
+#   - https://www.python.org/ftp/python/3.4.4/python-3.4.4.msi
+#   - https://www.python.org/ftp/python/3.4.4/python-3.4.4.amd64.msi
+# The MSI file has been installed on a Windows box and then c:\Python34\libs
+# and c:\Python34\include have been stored in the Python34_*.tar.gz tarball.
+$WGET http://www.sigrok.org/tmp/Python34_$TARGET.tar.gz -O $PREFIX/Python34.tar.gz
+tar xzf $PREFIX/Python34.tar.gz -C $PREFIX
+
+# Create a dummy python3.pc file so that pkg-config finds Python 3.
+mkdir -p $PREFIX/lib/pkgconfig
+cat >$PREFIX/lib/pkgconfig/python3.pc <<EOF
+prefix=$PREFIX
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+Name: Python
+Description: Python library
+Version: 3.4
+Libs: $PREFIX/Python34/libs/libpython34.a
+Cflags: -I$PREFIX/Python34/include
+EOF
+
+# The python34.dll and python34.zip files will be shipped in the NSIS
+# Windows installers (required for protocol decoding to work).
+# The file python34.dll (NOT the same as python3.dll) is copied from an
+# installed Python 3.4.4 (see above) from c:\Windows\system32\python34.dll.
+# The file python34.zip contains all files from the 'DLLs', 'Lib', and 'libs'
+# subdirectories from an installed Python on Windows (c:\python34), i.e. some
+# libraries and all Python stdlib modules.
+$WGET http://www.sigrok.org/tmp/python34_$TARGET.dll -O $PREFIX/python34.dll
+$WGET http://www.sigrok.org/tmp/python34_$TARGET.zip -O $PREFIX/python34.zip
+
+# In order to link against Python we need libpython34.a.
+# The upstream Python 32bit installer ships this, the x86_64 installer
+# doesn't. Thus, we generate the file manually here.
+if [ $TARGET = "x86_64" ]; then
+	cp $PREFIX/python34.dll .
+	$MXE/usr/$TARGET-w64-mingw32.static.posix/bin/gendef python34.dll
+	$MXE/usr/bin/$TARGET-w64-mingw32.static.posix-dlltool \
+		--dllname python34.dll --def python34.def \
+		--output-lib libpython34.a
+	mv -f libpython34.a $PREFIX/Python34/libs
+	rm -f python34.dll
+fi
+
+# Zadig (we ship this with frontends for easy driver switching).
+$WGET http://zadig.akeo.ie/downloads/zadig.exe -O $PREFIX/zadig.exe
+$WGET http://zadig.akeo.ie/downloads/zadig_xp.exe -O $PREFIX/zadig_xp.exe
+
+# libusb
+$GIT_CLONE git://github.com/dickens/libusb -b event-abstraction-v4
+cd libusb
+patch -p1 < ../../libusb_raw_io.patch
+./bootstrap.sh
+./configure $C $L
+make -j1 $V
+make install $V
+cd ..
+
+# libserialport
+$GIT_CLONE $REPO_BASE/libserialport
+cd libserialport
+./autogen.sh
+./configure $C $L
+make $PARALLEL $V
+make install $V
+cd ..
+
+# libsigrok
+$GIT_CLONE $REPO_BASE/libsigrok
+#git clone -b locale2 --single-branch ~/Projekte/elektronik/sigrok/libsigrok
+cd libsigrok
+./autogen.sh
+./configure $C $L
+make $PARALLEL $V
+make install $V
+# Compile tests but ignore errors from tests
+make check || true
+cp tests/ $PREFIX/share/ -r
+cd ..
+
+# libsigrokdecode
+$GIT_CLONE $REPO_BASE/libsigrokdecode
+cd libsigrokdecode
+./autogen.sh
+./configure $C $L
+make $PARALLEL $V
+make install $V
+cd ..
+
+# sigrok-firmware
+$GIT_CLONE $REPO_BASE/sigrok-firmware
+cd sigrok-firmware
+./autogen.sh
+# Nothing gets cross-compiled here, we just need 'make install' basically.
+./configure --prefix=$PREFIX
+make install $V
+cd ..
+
+# sigrok-firmware-fx2lafw
+$GIT_CLONE $REPO_BASE/sigrok-firmware-fx2lafw
+cd sigrok-firmware-fx2lafw
+./autogen.sh
+# We're building the fx2lafw firmware on the host, no need to cross-compile.
+./configure --prefix=$PREFIX
+make $PARALLEL $V
+make install $V
+cd ..
+
+# sigrok-dumps
+$GIT_CLONE $REPO_BASE/sigrok-dumps
+cd sigrok-dumps
+make install DESTDIR=$PREFIX/share/sigrok-dumps $V
+cd ..
+
+# sigrok-cli
+$GIT_CLONE $REPO_BASE/sigrok-cli
+cd sigrok-cli
+./autogen.sh
+./configure $C
+make $PARALLEL $V
+make install $V
+makensis contrib/sigrok-cli_cross.nsi
+cd ..
+
+# PulseView
+$GIT_CLONE $REPO_BASE/pulseview
+cd pulseview
+cp ../../FileAssociation.nsh contrib
+$CMAKE \
+	-DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
+	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+	-DDISABLE_WERROR=y \
+	-DENABLE_TESTS=y \
+	.
+make $PARALLEL $V
+if [ $DEBUG = 1 ]; then
+	make install $V
+else
+	make install/strip $V
+fi
+makensis contrib/pulseview_cross.nsi
+cd ..
+
+# SmuView
+#$GIT_CLONE https://github.com/knarfS/smuview.git
+$GIT_CLONE -b processing --single-branch ~/Projekte/elektronik/sigrok/smuview
+cd smuview
+$CMAKE \
+	-DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
+	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+	-DDISABLE_WERROR=y \
+	-DENABLE_TESTS=y \
+	.
+make $PARALLEL $V
+if [ $DEBUG = 1 ]; then
+	make install $V
+else
+	make install/strip $V
+fi
+cd ..
+
