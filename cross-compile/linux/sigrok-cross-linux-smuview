@@ -122,29 +122,12 @@ make install $V
 cd ../..
 fi
 
-# sigrok-cli
-$GIT_CLONE $REPO_BASE/sigrok-cli
-cd sigrok-cli
-./autogen.sh
-mkdir build
-cd build
-if [ `uname` = "FreeBSD" ]; then
-	# Temporary fix for: http://sigrok.org/bugzilla/show_bug.cgi?id=552
-	PKG_CONFIG_PATH=$P $SB ../configure $C LDFLAGS=-lusb
-else
-	PKG_CONFIG_PATH=$P $SB ../configure $C
-fi
-$SB make $PARALLEL $V
-make install $V
-cd ../..
-
 # SmuView
-git clone https://github.com/knarfS/smuview.git
+$GIT_CLONE https://github.com/knarfS/smuview.git
 cd smuview
-git checkout release
 mkdir build
 cd build
-PKG_CONFIG_PATH=$P $SB cmake -DCMAKE_PREFIX_PATH=/usr/local/Qt-5.11.3/ -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DDISABLE_WERROR=y -DCMAKE_EXPORT_COMPILE_COMMANDS=y ..
+PKG_CONFIG_PATH=$P $SB cmake -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DDISABLE_WERROR=y -DCMAKE_EXPORT_COMPILE_COMMANDS=y ..
 $SB make $PARALLEL $V
 make install $V
 cd ../..
