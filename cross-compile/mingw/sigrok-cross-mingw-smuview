@@ -3,6 +3,7 @@
 ## This file is part of the sigrok-util project.
 ##
 ## Copyright (C) 2013-2018 Uwe Hermann <uwe@hermann-uwe.de>
+## Copyright (C) 2018-2019 Frank Stettner <frank-stettner@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -179,15 +180,6 @@ make check || true
 cp tests/ $PREFIX/share/ -r
 cd ..
 
-# libsigrokdecode
-$GIT_CLONE $REPO_BASE/libsigrokdecode
-cd libsigrokdecode
-./autogen.sh
-./configure $C $L
-make $PARALLEL $V
-make install $V
-cd ..
-
 # sigrok-firmware
 $GIT_CLONE $REPO_BASE/sigrok-firmware
 cd sigrok-firmware
@@ -207,25 +199,10 @@ make $PARALLEL $V
 make install $V
 cd ..
 
-# sigrok-dumps
-$GIT_CLONE $REPO_BASE/sigrok-dumps
-cd sigrok-dumps
-make install DESTDIR=$PREFIX/share/sigrok-dumps $V
-cd ..
-
-# sigrok-cli
-$GIT_CLONE $REPO_BASE/sigrok-cli
-cd sigrok-cli
-./autogen.sh
-./configure $C
-make $PARALLEL $V
-make install $V
-makensis contrib/sigrok-cli_cross.nsi
-cd ..
-
-# PulseView
-$GIT_CLONE $REPO_BASE/pulseview
-cd pulseview
+# SmuView
+#$GIT_CLONE https://github.com/knarfS/smuview.git
+$GIT_CLONE -b processing --single-branch ~/Projekte/elektronik/sigrok/smuview
+cd smuview
 cp ../../FileAssociation.nsh contrib
 $CMAKE \
 	-DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
@@ -239,24 +216,6 @@ if [ $DEBUG = 1 ]; then
 else
 	make install/strip $V
 fi
-makensis contrib/pulseview_cross.nsi
-cd ..
-
-# SmuView
-#$GIT_CLONE https://github.com/knarfS/smuview.git
-$GIT_CLONE -b processing --single-branch ~/Projekte/elektronik/sigrok/smuview
-cd smuview
-$CMAKE \
-	-DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
-	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-	-DDISABLE_WERROR=y \
-	-DENABLE_TESTS=y \
-	.
-make $PARALLEL $V
-if [ $DEBUG = 1 ]; then
-	make install $V
-else
-	make install/strip $V
-fi
+makensis contrib/smuview_cross.nsi
 cd ..
 
