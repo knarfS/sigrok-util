@@ -81,27 +81,37 @@ cp $PREFIX/share/icons/hicolor/scalable/apps/$LOWERAPP.svg .
 copy_deps
 
 # Get all Qt5 plugins (won't be copied automatically).
-QT5PLUGINS=/usr/local/Qt-5.11.3/plugins # Host (+ AppRun) path.
-mkdir -p .$QT5PLUGINS
-cp -r $QT5PLUGINS/accessible .$QT5PLUGINS
-cp -r $QT5PLUGINS/generic .$QT5PLUGINS
-cp -r $QT5PLUGINS/iconengines .$QT5PLUGINS
-cp -r $QT5PLUGINS/imageformats .$QT5PLUGINS
-cp -r $QT5PLUGINS/platforminputcontexts .$QT5PLUGINS
-cp -r $QT5PLUGINS/platforms .$QT5PLUGINS
-	
+QT5PLUGINS=/opt/qt510/plugins # Host (+ AppRun) path.
+#mkdir -p .$QT5PLUGINS
+#cp -r $QT5PLUGINS/accessible .$QT5PLUGINS
+#cp -r $QT5PLUGINS/generic .$QT5PLUGINS
+#cp -r $QT5PLUGINS/iconengines .$QT5PLUGINS
+#cp -r $QT5PLUGINS/imageformats .$QT5PLUGINS
+#cp -r $QT5PLUGINS/platforminputcontexts .$QT5PLUGINS
+#cp -r $QT5PLUGINS/platforms .$QT5PLUGINS
+
+cp  $QT5PLUGINS/accessible/* ./usr/lib
+cp  $QT5PLUGINS/iconengines/* ./usr/lib
+cp  $QT5PLUGINS/imageformats/* ./usr/lib
+cp  $QT5PLUGINS/platforminputcontexts/* ./usr/lib
+cp  $QT5PLUGINS/platforms/* ./usr/lib
+
+# platforms must be copied to usr/bin otherwise the following error message occurs:
+# This application failed to start because it could not find or load the Qt platform plugin "xcb" in "".
+cp -r $QT5PLUGINS/platforms ./usr/bin
+
 # Get some additional dependencies of the Qt5 plugins.
-ldd .$QT5PLUGINS/platforms/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
-ldd .$QT5PLUGINS/imageformats/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd ./usr/lib/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd ./usr/lib/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Get the Qwt library
-QWTLIB=/usr/local/qwt-6.1.4
-mkdir -p .$QWTLIB
-cp -r $QWTLIB/lib .$QWTLIB
-cp $QWTLIB/lib/* ./usr/lib/
+QWTLIB=/usr/local/lib/libqwt*
+#mkdir -p .$QWTLIB
+#cp -r $QWTLIB/lib .$QWTLIB
+cp $QWTLIB ./usr/lib/
  
 # Get some additional dependencies of the Qwt lib
-ldd .$QWTLIB/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true 
+ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true 
 
 ########################################################################
 # Delete stuff that should not go into the AppImage
