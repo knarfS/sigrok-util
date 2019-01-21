@@ -47,9 +47,6 @@ fi
 # Edit this to enable/disable/modify parallel compiles.
 PARALLEL="-j 2"
 
-# Edit this to enable/disable building certain components.
-BUILD_SIGROK_FIRMWARE_FX2LAFW=0
-
 # Uncomment the following lines to build with clang and run scan-build.
 # export CC=clang
 # export CXX=clang++
@@ -97,31 +94,6 @@ PYTHONPATH=$PYPATH $SB make install $V
 # Compile tests but ignore errors from tests
 $SB make check $V || true
 cd ../..
-
-# sigrok-firmware
-$GIT_CLONE $REPO_BASE/sigrok-firmware
-cd sigrok-firmware
-./autogen.sh
-mkdir build
-cd build
-# Nothing gets cross-compiled here, we just need 'make install' basically.
-$SB ../configure $C
-make install $V
-cd ../..
-
-if [ $BUILD_SIGROK_FIRMWARE_FX2LAFW = 1 ]; then
-# sigrok-firmware-fx2lafw
-$GIT_CLONE $REPO_BASE/sigrok-firmware-fx2lafw
-cd sigrok-firmware-fx2lafw
-./autogen.sh
-mkdir build
-cd build
-# We're building the fx2lafw firmware on the host, no need to cross-compile.
-$SB ../configure $C
-make $PARALLEL $V
-make install $V
-cd ../..
-fi
 
 # SmuView
 $GIT_CLONE https://github.com/knarfS/smuview.git
