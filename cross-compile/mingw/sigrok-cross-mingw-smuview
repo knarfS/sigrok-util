@@ -22,10 +22,11 @@
 set -e
 
 # Build target: "i686" (32bit) or "x86_64" (64bit).
-TARGET="x86_64"
+#TARGET="x86_64"
+TARGET="i686"
 
 # The path where your MXE directory is located.
-MXE=$HOME/mxe/mxe-git-x86_64
+MXE=$HOME/mxe/mxe-git-$TARGET
 
 # The base path prefix where the cross-compiled packages will be installed.
 PREFIXBASE=$HOME/mxe/sr_mingw
@@ -52,20 +53,15 @@ GIT_CLONE="git clone --depth=1"
 REPO_BASE="git://sigrok.org"
 
 # Construct the build and install directory pathnames.
-if [ $TARGET = "i686" ]; then
-	SUFFIX="32"
-else
-	SUFFIX="64"
-fi
 if [ $DEBUG = 1 ]; then
 	# CFLAGS/CXXFLAGS contains "-g" per default for autotools projects.
 	BUILD_TYPE="Debug"
-	PREFIX=$PREFIXBASE"_debug_"$SUFFIX
-	BUILDDIR=$BUILDBASE"_debug_"$SUFFIX
+	PREFIX=$PREFIXBASE"_debug_"$TARGET
+	BUILDDIR=$BUILDBASE"_debug_"$TARGET
 else
 	BUILD_TYPE="Release"
-	PREFIX=$PREFIXBASE"_release_"$SUFFIX
-	BUILDDIR=$BUILDBASE"_release_"$SUFFIX
+	PREFIX=$PREFIXBASE"_release_"$TARGET
+	BUILDDIR=$BUILDBASE"_release_"$TARGET
 fi
 
 # -----------------------------------------------------------------------------
@@ -202,5 +198,11 @@ else
 	make install/strip $V
 fi
 makensis contrib/smuview_cross.nsi
-cd ..
+# Copy insaller exe to PREFIX dir and add TARGET
+cd contrib
+for f in *-installer.exe; do
+  fnew=`echo $f | sed 's/-installer.exe/-'$TARGET'-installer.exe/'`
+  cp $f $PREFIX/../$fnew
+done
+cd ../..
 
