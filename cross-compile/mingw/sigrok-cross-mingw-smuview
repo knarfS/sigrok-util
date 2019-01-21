@@ -22,25 +22,25 @@
 set -e
 
 # Build target: "i686" (32bit) or "x86_64" (64bit).
-TARGET="i686"
+TARGET="x86_64"
 
 # The path where your MXE directory is located.
-MXE=$HOME/mxe-git-smuview
+MXE=$HOME/mxe/mxe-git-x86_64
 
 # The base path prefix where the cross-compiled packages will be installed.
-PREFIXBASE=$HOME/sr_mingw_smuview
+PREFIXBASE=$HOME/mxe/sr_mingw
 
 # The base path prefix where to download files to and where to build packages.
 BUILDBASE=./build
 
 # Edit this to control verbose build output.
-V="V=1 VERBOSE=1"
+# V="V=1 VERBOSE=1"
 
 # Edit this to enable/disable/modify parallel compiles.
 PARALLEL="-j 4"
 
 # Edit this to enable/disable debug builds.
-DEBUG=1
+DEBUG=0
 
 # You usually don't need to change anything below this line.
 
@@ -107,6 +107,11 @@ mkdir -p $PREFIX
 $WGET http://www.sigrok.org/tmp/Python34_$TARGET.tar.gz -O $PREFIX/Python34.tar.gz
 tar xzf $PREFIX/Python34.tar.gz -C $PREFIX
 
+# Fix for bug #1195.
+if [ $TARGET = "x86_64" ]; then
+	patch -p1 $PREFIX/Python34/include/pyconfig.h < ../pyconfig.patch
+fi
+
 # Create a dummy python3.pc file so that pkg-config finds Python 3.
 mkdir -p $PREFIX/lib/pkgconfig
 cat >$PREFIX/lib/pkgconfig/python3.pc <<EOF
@@ -145,8 +150,8 @@ if [ $TARGET = "x86_64" ]; then
 fi
 
 # Zadig (we ship this with frontends for easy driver switching).
-$WGET http://zadig.akeo.ie/downloads/zadig.exe -O $PREFIX/zadig.exe
-$WGET http://zadig.akeo.ie/downloads/zadig_xp.exe -O $PREFIX/zadig_xp.exe
+$WGET https://github.com/pbatard/libwdi/releases/download/b721/zadig-2.4.exe -O $PREFIX/zadig.exe
+$WGET https://github.com/pbatard/libwdi/releases/download/v1.2.5/zadig_xp-2.2.exe -O $PREFIX/zadig_xp.exe
 
 # libusb
 $GIT_CLONE git://github.com/dickens/libusb -b event-abstraction-v4
@@ -169,7 +174,6 @@ cd ..
 
 # libsigrok
 $GIT_CLONE $REPO_BASE/libsigrok
-#git clone -b locale2 --single-branch ~/Projekte/elektronik/sigrok/libsigrok
 cd libsigrok
 ./autogen.sh
 ./configure $C $L
@@ -200,8 +204,8 @@ make install $V
 cd ..
 
 # SmuView
-#$GIT_CLONE https://github.com/knarfS/smuview.git
-$GIT_CLONE -b processing --single-branch ~/Projekte/elektronik/sigrok/smuview
+$GIT_CLONE https://github.com/knarfS/smuview.git
+#$GIT_CLONE -b processing --single-branch ~/Projekte/elektronik/sigrok/smuview
 cd smuview
 cp ../../FileAssociation.nsh contrib
 $CMAKE \
