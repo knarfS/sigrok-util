@@ -22,6 +22,7 @@ Requirements
  - git
  - wget
  - p7zip
+ - lzip
  - unzip
  - pkg-config (>= 0.22)
  - sdcc (needed for building the fx2lafw firmware)
@@ -32,11 +33,12 @@ Requirements
 MXE setup
 ---------
 
-First, get the MXE cross-compile environment for MinGW-w64/Windows:
+First, get the MXE cross-compile environment for MinGW-w64/Windows. Because the actual git isn't working (patch libusb path, qt failing (qt 5.7.1 uses qt latest configure cmd for target *-pc-linux-gnu)) we need to use a random commit from october 2018:
 
  $ cd $HOME
  $ git clone https://github.com/mxe/mxe.git mxe-git
  $ cd mxe-git
+ $ git checkout a063f9b35279d83f692df0345d84147c0f23c992
 
 Apply some fixes that are currently required for a proper build:
 
@@ -49,6 +51,13 @@ Build all required packages:
    gcc glib libzip libusb1 libftdi1 hidapi glibmm qtbase qtimageformats \
    qtsvg qttranslations boost check gendef libieee1284 qwt \
    qtbase_CONFIGURE_OPTS='-no-sql-mysql'
+
+or
+
+ $ make MXE_TARGETS=x86_64-w64-mingw32.static.posix \
+   MXE_PLUGIN_DIRS=plugins/examples/qt5-freeze \
+   gcc glib libzip libusb1 libftdi1 glibmm qtbase qtimageformats qtsvg \
+   boost check gendef qwt qtbase_CONFIGURE_OPTS='-no-sql-mysql'
 
 This will take a while.
 
