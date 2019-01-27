@@ -88,7 +88,7 @@ cd libsigrok
 ./autogen.sh
 mkdir build
 cd build
-PKG_CONFIG_PATH=$P $SB ../configure $C $JDK
+PKG_CONFIG_PATH=$P $SB ../configure $C --disable-java
 $SB make $PARALLEL $V
 PYTHONPATH=$PYPATH $SB make install $V
 # Compile tests but ignore errors from tests
