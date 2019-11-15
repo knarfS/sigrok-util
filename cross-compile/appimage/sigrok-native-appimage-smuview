@@ -52,6 +52,9 @@ cp $PREFIX/share/applications/org.sigrok.$APP.desktop usr/share/applications
 cp -r $PREFIX/share/icons usr/share/
 cp -r $PREFIX/share/metainfo usr/share/
 cp -r $PREFIX/share/mime usr/share/
+cp -r $PREFIX/share/doc usr/share/
+cp -r $PREFIX/share/man usr/share/
+cp -r $PREFIX/share/smuscript usr/share/
 
 # Drop unneeded stuff.
 rm -f usr/share/icons/hicolor/scalable/apps/sigrok-cli.svg
@@ -82,33 +85,29 @@ copy_deps
 
 # Get all Qt5 plugins (won't be copied automatically).
 QT5PLUGINS=/opt/qt512/plugins # Host (+ AppRun) path.
-mkdir -p .$QT5PLUGINS # TODO??
-cp -r $QT5PLUGINS/bearer .$QT5PLUGINS
-cp -r $QT5PLUGINS/generic .$QT5PLUGINS
-cp -r $QT5PLUGINS/iconengines .$QT5PLUGINS
-cp -r $QT5PLUGINS/imageformats .$QT5PLUGINS
-cp -r $QT5PLUGINS/platforminputcontexts .$QT5PLUGINS
-cp -r $QT5PLUGINS/platforms .$QT5PLUGINS
-cp -r $QT5PLUGINS/platformthemes .$QT5PLUGINS
-cp -r $QT5PLUGINS/printsupport .$QT5PLUGINS
-cp -r $QT5PLUGINS/xcbglintegrations .$QT5PLUGINS
-
-# platforms must be copied to usr/bin otherwise the following error message occurs:
-# This application failed to start because it could not find or load the Qt platform plugin "xcb" in "".
-#cp -r $QT5PLUGINS/platforms ./usr/bin
+mkdir -p ./usr/plugins
+cp -r $QT5PLUGINS/bearer ./usr/plugins
+cp -r $QT5PLUGINS/generic ./usr/plugins
+cp -r $QT5PLUGINS/iconengines ./usr/plugins
+cp -r $QT5PLUGINS/imageformats ./usr/plugins
+cp -r $QT5PLUGINS/platforminputcontexts ./usr/plugins
+cp -r $QT5PLUGINS/platforms ./usr/plugins
+cp -r $QT5PLUGINS/platformthemes ./usr/plugins
+cp -r $QT5PLUGINS/printsupport ./usr/plugins
+cp -r $QT5PLUGINS/xcbglintegrations ./usr/plugins
 
 # Get some additional dependencies of the Qt5 plugins.
-ldd .$QT5PLUGINS/platforms/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
-ldd .$QT5PLUGINS/imageformats/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd ./usr/plugins/platforms/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd ./usr/plugins/imageformats/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Get the Qwt library
-QWTLIB=/usr/local/lib/libqwt*
+#QWTLIB=/usr/local/lib/libqwt*
 #mkdir -p .$QWTLIB
 #cp -r $QWTLIB/lib .$QWTLIB
-cp $QWTLIB ./usr/lib/
+#cp $QWTLIB ./usr/lib/
 
 # Get some additional dependencies of the Qwt lib
-ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+#ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Python 3
 cp /usr/lib/$ARCH-linux-gnu/libpython$PYVER* ./usr/lib
@@ -134,7 +133,7 @@ rm -r ./home
 # Determine the version of the app
 ########################################################################
 
-VERSION="0.0.4-rc3"
+VERSION="0.0.4"
 echo $VERSION
 
 ########################################################################
