@@ -34,7 +34,7 @@ PREFIX=$HOME/sr
 BUILDDIR=./build
 
 # The path where the libsigrok Python bindings will be installed.
-PYPATH=$PREFIX/lib/python2.7/site-packages
+PYPATH=$PREFIX/lib/python3.5/site-packages
 
 # JDK include path. Usually found automatically, except on FreeBSD.
 if [ `uname` = "FreeBSD" ]; then
@@ -103,4 +103,6 @@ cd build
 PKG_CONFIG_PATH=$P $SB cmake -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DDISABLE_WERROR=y -DCMAKE_EXPORT_COMPILE_COMMANDS=y ..
 $SB make $PARALLEL $V
 make install/strip $V
+# Copy the qt.conf to bin for the AppImage generation
+cp ../contrib/qt.conf $PREFIX/bin
 cd ../..
