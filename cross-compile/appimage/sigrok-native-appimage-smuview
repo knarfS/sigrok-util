@@ -16,14 +16,14 @@ APPIMAGEKIT_OUTDIR=$HOME/AppImageKit/build/out
 # ARCH=i386
 ARCH=x86_64
 
-PYVER=3.4
+PYVER=3.5
 
 ########################################################################
 # You usually don't have to change anything below this line
 ########################################################################
 
 APP=SmuView
-LOWERAPP=${APP,,} 
+LOWERAPP=${APP,,}
 
 export ARCH
 export STATIC_FILES=`pwd`/contrib
@@ -81,37 +81,41 @@ cp $PREFIX/share/icons/hicolor/scalable/apps/$LOWERAPP.svg .
 copy_deps
 
 # Get all Qt5 plugins (won't be copied automatically).
-QT5PLUGINS=/opt/qt510/plugins # Host (+ AppRun) path.
-#mkdir -p .$QT5PLUGINS
-#cp -r $QT5PLUGINS/accessible .$QT5PLUGINS
-#cp -r $QT5PLUGINS/generic .$QT5PLUGINS
-#cp -r $QT5PLUGINS/iconengines .$QT5PLUGINS
-#cp -r $QT5PLUGINS/imageformats .$QT5PLUGINS
-#cp -r $QT5PLUGINS/platforminputcontexts .$QT5PLUGINS
-#cp -r $QT5PLUGINS/platforms .$QT5PLUGINS
-
-cp  $QT5PLUGINS/accessible/* ./usr/lib
-cp  $QT5PLUGINS/iconengines/* ./usr/lib
-cp  $QT5PLUGINS/imageformats/* ./usr/lib
-cp  $QT5PLUGINS/platforminputcontexts/* ./usr/lib
-cp  $QT5PLUGINS/platforms/* ./usr/lib
+QT5PLUGINS=/opt/qt512/plugins # Host (+ AppRun) path.
+mkdir -p .$QT5PLUGINS # TODO??
+cp -r $QT5PLUGINS/bearer .$QT5PLUGINS
+cp -r $QT5PLUGINS/generic .$QT5PLUGINS
+cp -r $QT5PLUGINS/iconengines .$QT5PLUGINS
+cp -r $QT5PLUGINS/imageformats .$QT5PLUGINS
+cp -r $QT5PLUGINS/platforminputcontexts .$QT5PLUGINS
+cp -r $QT5PLUGINS/platforms .$QT5PLUGINS
+cp -r $QT5PLUGINS/platformthemes .$QT5PLUGINS
+cp -r $QT5PLUGINS/printsupport .$QT5PLUGINS
+cp -r $QT5PLUGINS/xcbglintegrations .$QT5PLUGINS
 
 # platforms must be copied to usr/bin otherwise the following error message occurs:
 # This application failed to start because it could not find or load the Qt platform plugin "xcb" in "".
-cp -r $QT5PLUGINS/platforms ./usr/bin
+#cp -r $QT5PLUGINS/platforms ./usr/bin
 
 # Get some additional dependencies of the Qt5 plugins.
-ldd ./usr/lib/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
-ldd ./usr/lib/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd .$QT5PLUGINS/platforms/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd .$QT5PLUGINS/imageformats/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Get the Qwt library
 QWTLIB=/usr/local/lib/libqwt*
 #mkdir -p .$QWTLIB
 #cp -r $QWTLIB/lib .$QWTLIB
 cp $QWTLIB ./usr/lib/
- 
+
 # Get some additional dependencies of the Qwt lib
-ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true 
+ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+
+# Python 3
+cp /usr/lib/$ARCH-linux-gnu/libpython$PYVER* ./usr/lib
+mkdir -p ./usr/share/pyshared
+cp -r /usr/lib/python$PYVER/* ./usr/share/pyshared # AppRun expects this path.
+
+cp -r ./usr/share/pyshared/plat-$ARCH-linux-gnu/* ./usr/share/pyshared
 
 ########################################################################
 # Delete stuff that should not go into the AppImage
@@ -130,7 +134,7 @@ rm -r ./home
 # Determine the version of the app
 ########################################################################
 
-VERSION="0.0.1"
+VERSION="0.0.4-rc3"
 echo $VERSION
 
 ########################################################################
