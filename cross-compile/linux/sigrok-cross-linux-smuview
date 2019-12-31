@@ -98,6 +98,7 @@ cd ../..
 # SmuView
 $GIT_CLONE https://github.com/knarfS/smuview.git
 cd smuview
+git submodule update --init --remote --recursive
 mkdir build
 cd build
 PKG_CONFIG_PATH=$P $SB cmake -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DDISABLE_WERROR=y -DCMAKE_EXPORT_COMPILE_COMMANDS=y ..
