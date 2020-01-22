@@ -101,13 +101,13 @@ ldd ./usr/plugins/platforms/libqxcb.so | grep "=>" | awk '{print $3}' | xargs -I
 ldd ./usr/plugins/imageformats/libqsvg.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Get the Qwt library
-#QWTLIB=/usr/local/lib/libqwt*
+QWTLIB=/usr/lib/libqwt*
 #mkdir -p .$QWTLIB
 #cp -r $QWTLIB/lib .$QWTLIB
-#cp $QWTLIB ./usr/lib/
+cp $QWTLIB ./usr/lib/
 
 # Get some additional dependencies of the Qwt lib
-#ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+ldd ./usr/lib/libqwt.so | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Python 3
 cp /usr/lib/$ARCH-linux-gnu/libpython$PYVER* ./usr/lib
