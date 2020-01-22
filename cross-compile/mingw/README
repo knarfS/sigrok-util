@@ -56,8 +56,8 @@ or
 
  $ make MXE_TARGETS=x86_64-w64-mingw32.static.posix \
    MXE_PLUGIN_DIRS=plugins/examples/qt5-freeze \
-   gcc glib libzip libusb1 libftdi1 glibmm qtbase qtimageformats qtsvg \
-   boost check gendef qwt qtbase_CONFIGURE_OPTS='-no-sql-mysql'
+   gcc glib libzip libusb1 libftdi1 hidapi glibmm qtbase qtimageformats \
+   qtsvg qttranslations boost check gendef qwt qtbase_CONFIGURE_OPTS='-no-sql-mysql'
 
 This will take a while.
 
