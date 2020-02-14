@@ -103,6 +103,4 @@ cd build
 PKG_CONFIG_PATH=$P $SB cmake -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DDISABLE_WERROR=y -DCMAKE_EXPORT_COMPILE_COMMANDS=y ..
 $SB make $PARALLEL $V
 make install/strip $V
-# Copy the qt.conf to bin for the AppImage generation
-cp ../contrib/qt.conf $PREFIX/bin
 cd ../..
