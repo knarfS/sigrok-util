@@ -31,6 +31,8 @@ Building
 --------
 
  $ ./sigrok-native-macosx
+or
+ $ ./sigrok-native-macosx-smuview
 
 Per default it will install the compiled packages in:
 
