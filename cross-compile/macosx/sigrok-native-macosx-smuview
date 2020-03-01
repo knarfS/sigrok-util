@@ -47,7 +47,7 @@ export CXX=g++
 
 # We use Qt 5.5 in order to remain compatible with more versions of Mac OS X.
 # TODO: Use Qt >= 5.7
-QTVER=qt@5.5
+QTVER=qt
 
 # Path to Qt5 binaries (needed for cmake to find the Qt5 libs).
 export PATH="$(brew --prefix $QTVER)/bin:$PATH"

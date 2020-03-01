@@ -28,16 +28,13 @@ BUILDDIR=./build_app
 
 # We use Qt 5.5 in order to remain compatible with more versions of Mac OS X.
 # TODO: Use Qt >= 5.7
-QTVER=qt@5.5
+QTVER=qt
 
 # Path to Qt5 binaries.
 QTBINDIR=`brew list $QTVER | grep bin | head -n 1 | xargs dirname`
 
-# Path to boost libraries.
-BOOSTLIBDIR=`brew list boost | grep libboost_system | head -n 1 | xargs dirname`
-
 # Path to Python 3 framework.
-PYTHONFRAMEWORKDIR=`brew list python3 | grep Python.framework | head -n 1 | xargs dirname`/../../../..
+PYTHONFRAMEWORKDIR=`brew list python3 | grep Python.framework/Python | head -n 1 | xargs dirname`
 
 PYVER="3.7"
 
@@ -52,22 +49,16 @@ cd $BUILDDIR
 
 APPNAME="SmuView"
 APPNAME_BINARY="smuview"
-APPVER="NIGHTLY"
+APPVER="0.0.4"
 
 CONTENTSDIR="$APPNAME.app/Contents"
 MACOSDIR="$CONTENTSDIR/MacOS"
 FRAMEWORKSDIR="$CONTENTSDIR/Frameworks"
-SHARE_DIR="$CONTENTSDIR/share"
 PYDIR="$FRAMEWORKSDIR/Python.framework/Versions/$PYVER"
 
-mkdir -p $MACOSDIR $FRAMEWORKSDIR $SHARE_DIR
+mkdir -p $MACOSDIR $FRAMEWORKSDIR
 
 cp $PREFIX/bin/$APPNAME_BINARY $MACOSDIR
-
-# Manually copy some boost libs that "macdeployqt" won't copy.
-cp $BOOSTLIBDIR/libboost_timer-mt.dylib $FRAMEWORKSDIR
-cp $BOOSTLIBDIR/libboost_chrono-mt.dylib $FRAMEWORKSDIR
-chmod 644 $FRAMEWORKSDIR/*boost*
 
 $QTBINDIR/macdeployqt $APPNAME.app
 
@@ -94,14 +85,14 @@ rm -rf $PYDIR/Resources
 install_name_tool -change \
 	/usr/local/opt/python/Frameworks/Python.framework/Versions/$PYVER/Python \
 	@executable_path/../Frameworks/Python.framework/Versions/$PYVER/Python \
-	$FRAMEWORKSDIR/libsigrokdecode.*.dylib
+	$MACOSDIR/$APPNAME_BINARY
 
 # Add SmuView wrapper (sets PYTHONHOME).
 mv $MACOSDIR/$APPNAME_BINARY $MACOSDIR/$APPNAME_BINARY.real
 cp ../contrib/smuview $MACOSDIR
 chmod 755 $MACOSDIR/$APPNAME_BINARY
 
-cp ../contrib/Info-smuview.plist $CONTENTSDIR/Info.plist
+xsltproc --stringparam VERSION "${APPVER}" -o $CONTENTSDIR/Info.plist ../contrib/Info-smuview.xslt ../contrib/Info-smuview.plist
 cp ../contrib/smuview.icns $CONTENTSDIR/Resources
 
 hdiutil create "${APPNAME}-${APPVER}.dmg" -volname "$APPNAME $APPVER" \
