@@ -56,6 +56,12 @@ export PATH="$(brew --prefix $QTVER)/bin:$PATH"
 
 # -----------------------------------------------------------------------------
 
+if [ "$#" -eq 0 ]
+    then
+    echo "sigrok-native-macosx <SmuView GIT Commit>"
+    exit
+fi
+
 # PKG_CONFIG_PATH will need to point to pkg-config files of Homebrew's
 # keg-only formulae.
 P="$PREFIX/lib/pkgconfig"
@@ -102,8 +108,9 @@ $SB make check $V
 cd ../..
 
 # SmuView
-$GIT_CLONE https://github.com/knarfS/smuview.git
+git clone https://github.com/knarfS/smuview.git
 cd smuview
+git checkout $1
 mkdir build
 cd build
 PKG_CONFIG_PATH=$P $SB cmake -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DDISABLE_WERROR=y ..
