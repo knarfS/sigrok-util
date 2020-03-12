@@ -31,7 +31,7 @@ BUILDDIR=./build_app
 QTVER=qt
 
 # Path to Qt5 binaries.
-QTBINDIR=`brew list $QTVER | grep bin | head -n 1 | xargs dirname`
+QTDIR=`brew list $QTVER | grep bin | head -n 1 | xargs dirname | xargs dirname`
 
 # Path to Python 3 framework.
 PYTHONFRAMEWORKDIR=`brew list python3 | grep Python.framework/Python | head -n 1 | xargs dirname`
@@ -60,7 +60,7 @@ mkdir -p $MACOSDIR $FRAMEWORKSDIR
 
 cp $PREFIX/bin/$APPNAME_BINARY $MACOSDIR
 
-$QTBINDIR/macdeployqt $APPNAME.app
+$QTDIR/bin/macdeployqt $APPNAME.app
 
 # Copy Python framework and fix it up.
 cp -R $PYTHONFRAMEWORKDIR $FRAMEWORKSDIR
@@ -82,10 +82,34 @@ rm -rf $PYDIR/lib/python$PYVER/__pycache__
 rm -rf $PYDIR/lib/python$PYVER/**/__pycache__
 rm -rf $PYDIR/lib/python$PYVER/**/**/__pycache__
 rm -rf $PYDIR/Resources
+
 install_name_tool -change \
 	/usr/local/opt/python/Frameworks/Python.framework/Versions/$PYVER/Python \
 	@executable_path/../Frameworks/Python.framework/Versions/$PYVER/Python \
 	$MACOSDIR/$APPNAME_BINARY
+
+python ../macdeployqtfix.py -nl -f $MACOSDIR/$APPNAME_BINARY $QTDIR
+
+install_name_tool -change \
+	$QTDIR/lib/QtCore.framework/Versions/5/QtCore \
+	@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore \
+	$FRAMEWORKSDIR/QtConcurrent.framework/QtConcurrent
+
+install_name_tool -change \
+	$QTDIR/lib/QtCore.framework/Versions/5/QtCore \
+	@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore \
+	$FRAMEWORKSDIR/QtOpenGL.framework/QtOpenGL
+
+install_name_tool -change \
+	$QTDIR/lib/QtGui.framework/Versions/5/QtGui \
+	@executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui \
+	$FRAMEWORKSDIR/QtOpenGL.framework/QtOpenGL
+
+install_name_tool -change \
+	$QTDIR/lib/QtWidgets.framework/Versions/5/QtWidgets \
+	@executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets \
+	$FRAMEWORKSDIR/QtOpenGL.framework/QtOpenGL
+
 
 # Add SmuView wrapper (sets PYTHONHOME).
 mv $MACOSDIR/$APPNAME_BINARY $MACOSDIR/$APPNAME_BINARY.real
@@ -95,5 +119,4 @@ chmod 755 $MACOSDIR/$APPNAME_BINARY
 xsltproc --stringparam VERSION "${APPVER}" -o $CONTENTSDIR/Info.plist ../contrib/Info-smuview.xslt ../contrib/Info-smuview.plist
 cp ../contrib/smuview.icns $CONTENTSDIR/Resources
 
-hdiutil create "${APPNAME}-${APPVER}.dmg" -volname "$APPNAME $APPVER" \
-	-fs HFS+ -srcfolder "$APPNAME.app"
+hdiutil create "${APPNAME}-${APPVER}.dmg" -volname "$APPNAME $APPVER" -fs HFS+ -srcfolder "$APPNAME.app"
