@@ -1,0 +1,11 @@
+--- a/mingw-w64-headers/ddk/include/ddk/wdm.h
++++ b/mingw-w64-headers/ddk/include/ddk/wdm.h
+@@ -371,6 +371,10 @@ InterlockedExchangeAdd(
+
+ #if defined(_M_AMD64) && !defined(RC_INVOKED) && !defined(MIDL_PASS)
+ //#if !defined(_X86AMD64_) // FIXME: what's _X86AMD64_ used for?
++
++#undef InterlockedAdd64
++// We provide a version of our own here in this case
++
+ FORCEINLINE
