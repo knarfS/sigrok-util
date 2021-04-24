@@ -26,7 +26,7 @@ set -e
 TARGET="i686"
 
 # The path where your MXE directory is located.
-MXE=$HOME/mxe/mxe-git-$TARGET
+MXE=$HOME/mxe/mxe-git
 
 # The base path prefix where the cross-compiled packages will be installed.
 PREFIXBASE=$HOME/mxe/sr_mingw
@@ -145,19 +145,13 @@ if [ $TARGET = "x86_64" ]; then
 	rm -f python34.dll
 fi
 
+# We need to include the *.pyd files from python34.zip into the installers,
+# otherwise importing certain modules (e.g. ctypes) won't work (bug #1409).
+unzip -q $PREFIX/python34.zip *.pyd -d $PREFIX
+
 # Zadig (we ship this with frontends for easy driver switching).
 $WGET https://github.com/pbatard/libwdi/releases/download/b721/zadig-2.4.exe -O $PREFIX/zadig.exe
 $WGET https://github.com/pbatard/libwdi/releases/download/v1.2.5/zadig_xp-2.2.exe -O $PREFIX/zadig_xp.exe
-
-# libusb
-$GIT_CLONE git://github.com/dickens/libusb -b event-abstraction-v4
-cd libusb
-patch -p1 < ../../libusb_raw_io.patch
-./bootstrap.sh
-./configure $C $L
-make -j1 $V
-make install $V
-cd ..
 
 # libserialport
 $GIT_CLONE $REPO_BASE/libserialport
@@ -175,9 +169,6 @@ cd libsigrok
 ./configure $C $L
 make $PARALLEL $V
 make install $V
-# Compile tests but ignore errors from tests
-make check || true
-cp tests/ $PREFIX/share/ -r
 cd ..
 
 # SmuView
@@ -198,7 +189,12 @@ if [ $DEBUG = 1 ]; then
 else
 	make install/strip $V
 fi
-makensis contrib/smuview_cross.nsi
+if [ $TARGET = "i686" ]; then
+	makensis contrib/smuview_cross.nsi
+else
+	makensis -DPE64=1 contrib/smuview_cross.nsi
+fi
+
 # Copy insaller exe to PREFIX dir and add TARGET
 cd contrib
 for f in *-installer.exe; do
@@ -206,4 +202,3 @@ for f in *-installer.exe; do
   cp $f $PREFIX/../$fnew
 done
 cd ../..
-
