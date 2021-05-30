@@ -1,0 +1,40 @@
+-------------------------------------------------------------------------------
+README
+-------------------------------------------------------------------------------
+
+This are the Dockerfiles used for building / cross-compiling sigrok, pulseview,
+smuview, etc. and their dependencies inside docker containers.
+Also used for CI/CD with github actions.
+
+
+Status
+------
+
+In development
+
+
+Requirements
+------------
+
+- docker
+
+
+Available Dockerfiles
+---------------------
+
+Dockerfile.sigrok-mxe:
+
+  This image conatins everything that is needed to cross compile pulseview,
+  smuview and sigrok-cli for Windows (>= XP).
+  Available targets are i686-w64-mingw32.static.posix and x86_64-w64-mingw32.static.posix
+
+  ToDo:
+  Prop. needed?: pkg-config
+  Removed: cmake, nsis, scons, sdcc
+  Added: doxygen (Dependency for libsigrok C++, not available for MXE but host doxygen will be OK... Urgs!)
+
+
+Building
+--------
+
+ $ docker build -t -f
