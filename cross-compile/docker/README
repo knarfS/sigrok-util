@@ -10,7 +10,7 @@ Also used for CI/CD with github actions.
 Status
 ------
 
-In development
+Working.
 
 
 Requirements
@@ -22,19 +22,51 @@ Requirements
 Available Dockerfiles
 ---------------------
 
-Dockerfile.sigrok-mxe:
+sigrok-mxe.Dockerfile:
 
   This image conatins everything that is needed to cross compile pulseview,
   smuview and sigrok-cli for Windows (>= XP).
-  Available targets are i686-w64-mingw32.static.posix and x86_64-w64-mingw32.static.posix
+  Available targets are i686-w64-mingw32.static.posix and
+  x86_64-w64-mingw32.static.posix
 
-  ToDo:
-  Prop. needed?: pkg-config
-  Removed: cmake, nsis, scons, sdcc
-  Added: doxygen (Dependency for libsigrok C++, not available for MXE but host doxygen will be OK... Urgs!)
+  Environment variables:
+   - BASE_DIR = "/opt"
+   - MXE_DIR = "$BASE_DIR/mxe"
 
+  Building:
+   $ docker build --no-cache -f sigrok-mxe.Dockerfile -t sigrok-mxe:latest .
 
-Building
---------
+  Notes:
+   - Add packeds for pulseview: cmake, scons, sdcc
+   - Package doxygen is a dependency for libsigrok C++, but not available for
+     MXE. The host doxygen is sufficient for building... Urgs!
 
- $ docker build -t -f
+sigrok-appimage-x86_64.Dockerfile:
+
+  This image conatins everything that is needed for creating an x86_64 AppImage
+  for pulseview, smuview and sigrok-cli.
+
+  Environment variables:
+   - BASE_DIR = "/opt"
+   - APPIMAGE_EXTRACT_AND_RUN = 1
+   - ARCH = "x86_64"
+
+sigrok-appimage-x86_64-i386.Dockerfile:
+
+  This image conatins everything that is needed for creating an i386 AppImage
+  for pulseview, smuview and sigrok-cli by cross-compiling.
+
+  Environment variables:
+   - BASE_DIR = "/opt"
+   - APPIMAGE_EXTRACT_AND_RUN = 1
+   - ARCH = "i386"
+
+sigrok-appimage-i386.Dockerfile:
+
+  This image conatins everything that is needed for creating an i386 AppImage
+  for pulseview, smuview and sigrok-cli.
+
+  Environment variables:
+   - BASE_DIR = "/opt"
+   - APPIMAGE_EXTRACT_AND_RUN = 1
+   - ARCH = "i386"
