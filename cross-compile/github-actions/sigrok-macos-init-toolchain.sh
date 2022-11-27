@@ -19,20 +19,21 @@
 ## along with this program; if not, see <http://www.gnu.org/licenses/>.
 ##
 
+# NOTE: $HB_QTVER and $HB_PYVER are defined as environment variables of the
+#       github workflow
+
 set -e
 
 export PARALLEL="-j "`sysctl -n hw.ncpu`
 
-# We use Qt 5.15.x
-export QTVER=qt@5
-
-# Path to Qt5 binaries (needed for cmake to find the Qt5 libs).
-export PATH="$(brew --prefix $QTVER)/bin:$PATH"
+# Path to the binaries installed by homebrew (needed for cmake to find the Qt5
+# and Python libs).
+export PATH="$(brew --prefix "$HB_PYVER")/bin:$(brew --prefix "$HB_QTVER")/bin:$PATH"
 
 # PKG_CONFIG_PATH will need to point to pkg-config files of Homebrew's
 # keg-only formulae.
 P="$INSTALL_DIR/lib/pkgconfig"
-for FORMULA in libffi python@3 "$QTVER"; do
+for FORMULA in libffi "$HB_PYVER" "$HB_QTVER"; do
     P="$P:$(brew --prefix "$FORMULA")/lib/pkgconfig"
 done
 export P

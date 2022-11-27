@@ -19,14 +19,17 @@
 ## along with this program; if not, see <http://www.gnu.org/licenses/>.
 ##
 
+# NOTE: $HB_QTVER and $HB_PYVER are defined as environment variables of the
+#       github workflow
+
 set -e
 set -x
 
 # Path to Qt5 binaries.
-QTBINDIR=`brew list $QTVER | grep bin | head -n 1 | xargs dirname`
+QTBINDIR=`brew list "$HB_QTVER" | grep bin | head -n 1 | xargs dirname`
 
 # Path to Python 3 framework.
-PYTHONFRAMEWORKDIR=`brew list python3 | grep Python.framework/Python | head -n 1 | xargs dirname`
+PYTHONFRAMEWORKDIR=`brew list "$HB_PYVER" | grep Python.framework/Python | head -n 1 | xargs dirname`
 
 # Get Python version
 PYVER=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))'`
