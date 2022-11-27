@@ -2,8 +2,7 @@
 ##
 ## This file is part of the sigrok-util project.
 ##
-## Copyright (C) 2014 Uwe Hermann <uwe@hermann-uwe.de>
-## Copyright (C) 2019-2022 Frank Stettner <frank-stettner@gmx.net>
+## Copyright (C) 2022 Frank Stettner <frank-stettner@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -27,20 +26,12 @@ BUILD_DIR=./build
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
-# libserialport
-$GIT_CLONE $SIGROK_REPO_BASE/libserialport
-cd libserialport
-./autogen.sh
-./configure $C
+# Qwt 6.1.6
+$WGET https://sourceforge.net/projects/qwt/files/qwt/6.1.6/qwt-6.1.6.tar.bz2
+tar xf qwt-6.1.6.tar.bz2
+cd qwt-6.1.6
+qmake qwt.pro
 make $PARALLEL $V
+# Change the QWT_INSTALL_PREFIX in qwtconfig.pri to $INSTALL_DIR
+sed -i 's|^\([[:space:]]*QWT_INSTALL_PREFIX[[:space:]]*=[[:space:]]*\)/usr.*$|\1'"$INSTALL_DIR"'|g' qwtconfig.pri
 make install $V
-cd ..
-
-# libsigrok
-$GIT_CLONE $SIGROK_REPO_BASE/libsigrok
-cd libsigrok
-./autogen.sh
-PKG_CONFIG_PATH=$P ./configure $C --disable-java
-make $PARALLEL $V
-make install $V
-cd ..
