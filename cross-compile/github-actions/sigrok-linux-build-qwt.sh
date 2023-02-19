@@ -19,6 +19,7 @@
 ##
 
 set -e
+set -x
 
 mkdir -p $INSTALL_DIR
 
