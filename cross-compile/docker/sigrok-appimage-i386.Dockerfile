@@ -12,7 +12,7 @@ RUN apt-get update \
 	# Install basic stuff
 	&& apt-get install -y --no-install-recommends \
 		sudo bash apt-utils software-properties-common git \
-		wget ca-certificates gnupg2 unzip bzip2 lzip sed \
+		wget ca-certificates gpg gnupg2 unzip bzip2 lzip sed \
 	# Install build stuff
 	&& apt-get install -y --no-install-recommends \
 		gcc g++ make autoconf autoconf-archive automake libtool \
@@ -30,12 +30,9 @@ RUN apt-get update \
 	&& update-ca-certificates \
 	#
 	# Install current cmake
-	&& wget https://apt.kitware.com/keys/kitware-archive-latest.asc \
-	&& apt-key add kitware-archive-latest.asc \
-	&& apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' \
+	&& wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg > /dev/null \
+	&& echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | sudo tee /etc/apt/sources.list.d/kitware.list > /dev/null \
 	&& apt-get update \
-	&& apt-get install -y kitware-archive-keyring \
-	&& apt-key --keyring /etc/apt/trusted.gpg del C1F34CDD40CD72DA \
 	&& apt-get install -y cmake \
 	#
 	# Cleanup apt
