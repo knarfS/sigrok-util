@@ -37,7 +37,7 @@ sigrok-mxe.Dockerfile:
    $ docker build --no-cache -f sigrok-mxe.Dockerfile -t sigrok-mxe:latest .
 
   Notes:
-   - Add packeds for pulseview: cmake, scons, sdcc
+   - Add packets for pulseview: cmake, scons, sdcc
    - Package doxygen is a dependency for libsigrok C++, but not available for
      MXE. The host doxygen is sufficient for building... Urgs!
 
@@ -51,6 +51,9 @@ sigrok-appimage-x86_64.Dockerfile:
    - APPIMAGE_EXTRACT_AND_RUN = 1
    - ARCH = "x86_64"
 
+  Building:
+   $ docker build --no-cache -f sigrok-appimage-x86_64.Dockerfile -t sigrok-appimage-x86_64:latest .
+
 sigrok-appimage-x86_64-i386.Dockerfile:
 
   This image conatins everything that is needed for creating an i386 AppImage
@@ -61,6 +64,9 @@ sigrok-appimage-x86_64-i386.Dockerfile:
    - APPIMAGE_EXTRACT_AND_RUN = 1
    - ARCH = "i386"
 
+  Building:
+   $ docker build --no-cache -f sigrok-appimage-x86_64-i386.Dockerfile -t sigrok-appimage-x86_64-i386:latest .
+
 sigrok-appimage-i386.Dockerfile:
 
   This image conatins everything that is needed for creating an i386 AppImage
@@ -70,3 +76,6 @@ sigrok-appimage-i386.Dockerfile:
    - BASE_DIR = "/opt"
    - APPIMAGE_EXTRACT_AND_RUN = 1
    - ARCH = "i386"
+
+  Building:
+   $ docker build --no-cache -f sigrok-appimage-i386.Dockerfile -t sigrok-appimage-i386:latest .
