@@ -84,7 +84,7 @@ fi
 unzip -q $INSTALL_DIR/python34.zip *.pyd -d $INSTALL_DIR
 
 # libserialport
-$GIT_CLONE $SIGROK_REPO_BASE/libserialport libserialport
+$GIT_CLONE $LIBSERIALPORT_REPO libserialport
 cd libserialport
 ./autogen.sh
 ./configure $C $L
@@ -93,7 +93,7 @@ make install $V
 cd ..
 
 # libsigrok
-$GIT_CLONE -b ${LIBSIGROK_BRANCH:-master} $SIGROK_REPO_BASE/libsigrok libsigrok
+$GIT_CLONE -b ${LIBSIGROK_BRANCH:-master} $LIBSIGROK_REPO libsigrok
 cd libsigrok
 ./autogen.sh
 ./configure $C $L
