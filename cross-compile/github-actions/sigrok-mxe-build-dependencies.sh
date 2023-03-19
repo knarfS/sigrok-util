@@ -3,7 +3,7 @@
 ## This file is part of the sigrok-util project.
 ##
 ## Copyright (C) 2013-2018 Uwe Hermann <uwe@hermann-uwe.de>
-## Copyright (C) 2018-2021 Frank Stettner <frank-stettner@gmx.net>
+## Copyright (C) 2018-2023 Frank Stettner <frank-stettner@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ fi
 unzip -q $INSTALL_DIR/python34.zip *.pyd -d $INSTALL_DIR
 
 # libserialport
-$GIT_CLONE $SIGROK_REPO_BASE/libserialport
+$GIT_CLONE $SIGROK_REPO_BASE/libserialport libserialport
 cd libserialport
 ./autogen.sh
 ./configure $C $L
@@ -93,7 +93,7 @@ make install $V
 cd ..
 
 # libsigrok
-$GIT_CLONE $SIGROK_REPO_BASE/libsigrok
+$GIT_CLONE -b ${LIBSIGROK_BRANCH:-master} $SIGROK_REPO_BASE/libsigrok libsigrok
 cd libsigrok
 ./autogen.sh
 ./configure $C $L

@@ -3,7 +3,7 @@
 ## This file is part of the sigrok-util project.
 ##
 ## Copyright (C) 2014 Uwe Hermann <uwe@hermann-uwe.de>
-## Copyright (C) 2019-2022 Frank Stettner <frank-stettner@gmx.net>
+## Copyright (C) 2019-2023 Frank Stettner <frank-stettner@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
 # libserialport
-$GIT_CLONE $SIGROK_REPO_BASE/libserialport
+$GIT_CLONE $SIGROK_REPO_BASE/libserialport libserialport
 cd libserialport
 ./autogen.sh
 ./configure $C
@@ -37,7 +37,7 @@ make install $V
 cd ..
 
 # libsigrok
-$GIT_CLONE $SIGROK_REPO_BASE/libsigrok
+$GIT_CLONE -b ${LIBSIGROK_BRANCH:-master} $SIGROK_REPO_BASE/libsigrok libsigrok
 cd libsigrok
 ./autogen.sh
 PKG_CONFIG_PATH=$P ./configure $C --disable-java
