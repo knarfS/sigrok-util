@@ -3,7 +3,7 @@
 ## This file is part of the sigrok-util project.
 ##
 ## Copyright (C) 2017 Uwe Hermann <uwe@hermann-uwe.de>
-## Copyright (C) 2021 Frank Stettner <frank-stettner@gmx.net>
+## Copyright (C) 2021-2023 Frank Stettner <frank-stettner@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -26,13 +26,14 @@ set -e
 set -x
 
 # Path to Qt5 binaries.
-QTBINDIR=`brew list "$HB_QTVER" | grep bin | head -n 1 | xargs dirname`
+QTBINDIR=$(brew list "$HB_QTVER" | grep bin | head -n 1 | xargs dirname)
 
 # Path to Python 3 framework.
-PYTHONFRAMEWORKDIR=`brew list "$HB_PYVER" | grep Python.framework/Python | head -n 1 | xargs dirname`
+PYTHONFRAMEWORKDIR=$(brew list "$HB_PYVER" | grep Python.framework/Python | head -n 1 | xargs dirname)
+PYTHONPREFIXDIR=$(brew --prefix "$HB_PYVER")
 
 # Get Python version
-PYVER=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))'`
+PYVER=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
 
 DMG_BUILD_DIR=./build_dmg
 mkdir $DMG_BUILD_DIR
@@ -45,32 +46,34 @@ PYDIR="$FRAMEWORKSDIR/Python.framework/Versions/$PYVER"
 
 mkdir -p $MACOSDIR $FRAMEWORKSDIR
 
-cp $INSTALL_DIR/bin/$SV_BIN_NAME $MACOSDIR
+cp "$INSTALL_DIR"/bin/$SV_BIN_NAME $MACOSDIR
 
-$QTBINDIR/macdeployqt $SV_TITLE.app
+"$QTBINDIR"/macdeployqt $SV_TITLE.app
 
 # Copy Python framework and fix it up.
-cp -R $PYTHONFRAMEWORKDIR $FRAMEWORKSDIR
-chmod 644 $PYDIR/lib/libpython*.dylib
-rm -rf $PYDIR/Headers
-rm -rf $PYDIR/bin
-rm -rf $PYDIR/include
-rm -rf $PYDIR/share
-rm -rf $PYDIR/lib/pkgconfig
-rm -rf $PYDIR/lib/python$PYVER/lib2to3
-rm -rf $PYDIR/lib/python$PYVER/distutils
-rm -rf $PYDIR/lib/python$PYVER/idlelib
-rm -rf $PYDIR/lib/python$PYVER/test
-rm -rf $PYDIR/lib/python$PYVER/**/test
-rm -rf $PYDIR/lib/python$PYVER/tkinter
-rm -rf $PYDIR/lib/python$PYVER/turtledemo
-rm -rf $PYDIR/lib/python$PYVER/unittest
-rm -rf $PYDIR/lib/python$PYVER/__pycache__
-rm -rf $PYDIR/lib/python$PYVER/**/__pycache__
-rm -rf $PYDIR/lib/python$PYVER/**/**/__pycache__
-rm -rf $PYDIR/Resources
+cp -R "$PYTHONFRAMEWORKDIR" $FRAMEWORKSDIR
+chmod 644 "$PYDIR"/lib/libpython*.dylib
+rm -rf "$PYDIR"/Headers
+rm -rf "$PYDIR"/bin
+rm -rf "$PYDIR"/include
+rm -rf "$PYDIR"/share
+rm -rf "$PYDIR"/lib/pkgconfig
+rm -rf "$PYDIR"/lib/python$PYVER/lib2to3
+rm -rf "$PYDIR"/lib/python$PYVER/distutils
+rm -rf "$PYDIR"/lib/python$PYVER/idlelib
+rm -rf "$PYDIR"/lib/python$PYVER/test
+rm -rf "$PYDIR"/lib/python$PYVER/**/test
+rm -rf "$PYDIR"/lib/python$PYVER/tkinter
+rm -rf "$PYDIR"/lib/python$PYVER/turtledemo
+rm -rf "$PYDIR"/lib/python$PYVER/unittest
+rm -rf "$PYDIR"/lib/python$PYVER/__pycache__
+rm -rf "$PYDIR"/lib/python$PYVER/**/__pycache__
+rm -rf "$PYDIR"/lib/python$PYVER/**/**/__pycache__
+rm -rf "$PYDIR"/Resources
+
+# Replace paths
 install_name_tool -change \
-	/usr/local/opt/python/Frameworks/Python.framework/Versions/$PYVER/Python \
+	"$PYTHONPREFIXDIR"/Frameworks/Python.framework/Versions/$PYVER/Python \
 	@executable_path/../Frameworks/Python.framework/Versions/$PYVER/Python \
 	$MACOSDIR/$SV_BIN_NAME
 
