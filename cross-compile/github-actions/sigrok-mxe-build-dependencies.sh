@@ -42,6 +42,9 @@ if [ $TARGET = "x86_64" ]; then
 	patch -p1 $INSTALL_DIR/Python34/include/pyconfig.h < ../contrib-mxe/pyconfig.patch
 fi
 
+# Fix for MXE build error with old Python 3.4
+patch -p1 $INSTALL_DIR/Python34/include/pyerrors.h < ../contrib-mxe/pyerrors.patch
+
 # Create a dummy python3.pc file so that pkg-config finds Python 3.
 mkdir -p $INSTALL_DIR/lib/pkgconfig
 cat >$INSTALL_DIR/lib/pkgconfig/python3.pc <<EOF

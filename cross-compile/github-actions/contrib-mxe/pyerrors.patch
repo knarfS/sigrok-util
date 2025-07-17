@@ -1,0 +1,49 @@
+Fix MXE build error with old Python 3.4
+
+Build error:
+```
+[ 34%] Generating qrc_smuview.cpp
+[ 34%] Building CXX object CMakeFiles/smuview.dir/smuview_autogen/mocs_compilation.cpp.obj
+[ 34%] Building CXX object CMakeFiles/smuview.dir/src/application.cpp.obj
+[ 35%] Building CXX object CMakeFiles/smuview.dir/main.cpp.obj
+[ 36%] Building CXX object CMakeFiles/smuview.dir/src/devicemanager.cpp.obj
+[ 37%] Built target smuview-test
+[ 37%] Building CXX object CMakeFiles/smuview.dir/src/mainwindow.cpp.obj
+[ 38%] Building CXX object CMakeFiles/smuview.dir/src/session.cpp.obj
+In file included from /__w/smuview/smuview/sr/Python34/include/Python.h:108,
+                 from /__w/smuview/smuview/smuview/external/pybind11_2.9.2/include/pybind11/detail/common.h:213,
+                 from /__w/smuview/smuview/smuview/external/pybind11_2.9.2/include/pybind11/cast.h:13,
+                 from /__w/smuview/smuview/smuview/external/pybind11_2.9.2/include/pybind11/attr.h:13,
+                 from /__w/smuview/smuview/smuview/external/pybind11_2.9.2/include/pybind11/detail/class.h:12,
+                 from /__w/smuview/smuview/smuview/external/pybind11_2.9.2/include/pybind11/pybind11.h:13,
+                 from /__w/smuview/smuview/smuview/build/smuview_autogen/3MH5VUM4LI/../../../src/python/pystreamredirect.hpp:27,
+                 from /__w/smuview/smuview/smuview/build/smuview_autogen/3MH5VUM4LI/moc_pystreamredirect.cpp:10,
+                 from /__w/smuview/smuview/smuview/build/smuview_autogen/mocs_compilation.cpp:36:
+/opt/mxe/usr/i686-w64-mingw32.static.posix/include/boost/assert/source_location.hpp: In member function 'std::string boost::source_location::to_string() const':
+/opt/mxe/usr/i686-w64-mingw32.static.posix/include/boost/assert/source_location.hpp:95:9: error: '_snprintf' is not a member of 'std'; did you mean 'vsnprintf'?
+   95 |         BOOST_ASSERT_SNPRINTF( buffer, ":%lu", ln );
+      |         ^~~~~~~~~~~~~~~~~~~~~
+/opt/mxe/usr/i686-w64-mingw32.static.posix/include/boost/assert/source_location.hpp:102:13: error: '_snprintf' is not a member of 'std'; did you mean 'vsnprintf'?
+  102 |             BOOST_ASSERT_SNPRINTF( buffer, ":%lu", co );
+      |             ^~~~~~~~~~~~~~~~~~~~~
+make[2]: *** [CMakeFiles/smuview.dir/build.make:137: CMakeFiles/smuview.dir/smuview_autogen/mocs_compilation.cpp.obj] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [CMakeFiles/Makefile2:215: CMakeFiles/smuview.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2
+```
+
+See releated Github issue:
+https://github.com/nlohmann/json/issues/1408#issuecomment-463953575
+
+diff --git a/pyerrors.h.orig b/pyerrors.h
+index e5a1adb..8195d08 100644
+--- a/pyerrors.h.orig
++++ b/pyerrors.h
+@@ -448,6 +448,7 @@ PyAPI_FUNC(int) PyUnicodeTranslateError_SetReason(
+    not rely on any particular behavior; eventually the C99 defn may
+    be reliable.
+ */
++#define HAVE_SNPRINTF
+ #if defined(MS_WIN32) && !defined(HAVE_SNPRINTF)
+ # define HAVE_SNPRINTF
+ # define snprintf _snprintf
