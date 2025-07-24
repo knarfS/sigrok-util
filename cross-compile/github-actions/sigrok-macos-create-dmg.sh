@@ -48,7 +48,7 @@ mkdir -p $MACOSDIR $FRAMEWORKSDIR
 
 cp "$INSTALL_DIR"/bin/$SV_BIN_NAME $MACOSDIR
 
-"$QTBINDIR"/macdeployqt $SV_TITLE.app
+"$QTBINDIR"/macdeployqt $SV_TITLE.app -verbose=3
 
 # Copy Python framework and fix it up.
 cp -R "$PYTHONFRAMEWORKDIR" $FRAMEWORKSDIR
@@ -93,7 +93,7 @@ xsltproc --stringparam VERSION "${SV_VERSION_STRING}" -o $CONTENTSDIR/Info.plist
 cp ../contrib-macos/smuview.icns $CONTENTSDIR/Resources
 
 hdiutil create "${SV_TITLE}-${SV_VERSION_STRING}.dmg" -volname "$SV_TITLE $SV_VERSION_STRING" \
-	-fs HFS+ -srcfolder "$SV_TITLE.app"
+	-fs HFS+ -srcfolder "$SV_TITLE.app" -debug
 
 # Move DMG to parent directory, so it is accessible without knowing $DMG_BUILD_DIR
 mv "${SV_TITLE}-${SV_VERSION_STRING}.dmg" ..
