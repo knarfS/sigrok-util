@@ -40,7 +40,7 @@ cd ..
 $GIT_CLONE -b ${LIBSIGROK_BRANCH:-master} $LIBSIGROK_REPO libsigrok
 cd libsigrok
 ./autogen.sh
-PKG_CONFIG_PATH=$P ./configure $C
+PKG_CONFIG_PATH=$P ./configure $C --disable-java --disable-ruby
 make $PARALLEL $V
 make install $V
 cd ..
