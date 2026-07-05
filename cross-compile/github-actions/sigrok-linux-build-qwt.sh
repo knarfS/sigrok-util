@@ -2,7 +2,7 @@
 ##
 ## This file is part of the sigrok-util project.
 ##
-## Copyright (C) 2022 Frank Stettner <frank-stettner@gmx.net>
+## Copyright (C) 2022-2026 Frank Stettner <frank-stettner@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
 # Qwt 6.1.6
-$WGET https://sourceforge.net/projects/qwt/files/qwt/6.1.6/qwt-6.1.6.tar.bz2
-tar xf qwt-6.1.6.tar.bz2
-cd qwt-6.1.6
+$WGET https://sourceforge.net/projects/qwt/files/qwt/6.3.0/qwt-6.3.0.tar.bz2
+tar xf qwt-6.3.0.tar.bz2
+cd qwt-6.3.0
 qmake qwt.pro
 make $PARALLEL $V
 # Change the QWT_INSTALL_PREFIX in qwtconfig.pri to $INSTALL_DIR
